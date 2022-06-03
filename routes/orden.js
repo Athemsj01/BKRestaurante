@@ -103,7 +103,7 @@ router.post('/nuevo_beb_ord',async(req, res) =>{
 router.get('/leer_detalles_comida/:ord_id', async(req, res) =>{
     try{
         const ord_id = req.params.ord_id;
-        const query = 'SELECT C.menuco_nombre AS ord_comida, COUNT(C.menuco_nombre) AS ord_cantidad_platos ' +
+        const query = 'SELECT C.menuco_nombre AS ord_comida, COUNT(C.menuco_nombre) AS ord_cantidad_platos, SUM(C.menuco_costo) AS precio_comida ' +
                         'FROM menu_comida AS C INNER JOIN alimentos_orden AS AO INNER JOIN orden '+
                         'WHERE (AO.ali_ord_id = orden.ord_id) AND (C.menuco_id = AO.ali_menuco_id) AND orden.ord_id = ? '+
                         'GROUP BY C.menuco_nombre';
@@ -119,10 +119,27 @@ router.get('/leer_detalles_comida/:ord_id', async(req, res) =>{
 router.get('/leer_detalles_bebida/:ord_id', async(req, res) =>{
     try{
         const ord_id = req.params.ord_id;
-        const query = 'SELECT A.menube_nombre AS ord_bebidas, COUNT(A.menube_nombre) AS ord_cantidad_bebidas '+
+        const query = 'SELECT A.menube_nombre AS ord_bebidas, COUNT(A.menube_nombre) AS ord_cantidad_bebidas, SUM(A.menube_costo) AS precio_bebida '+
                         'FROM menu_bebida AS A INNER JOIN bebidas_orden AS BO INNER JOIN orden ' +
                         'WHERE (BO.beb_ord_id = orden.ord_id) AND (A.menube_id = BO.beb_menube_id) AND orden.ord_id = ? '+
                         'group by A.menube_nombre';
+        const orden = await connection.query(query, [ord_id]);
+        res.json(orden);
+    } catch(error){
+        return res.json({
+            error: error
+        });
+    }
+});
+router.get('/total_orden/:ord_id', async(req, res) =>{
+    try{
+        const ord_id = req.params.ord_id;
+        const query =   'SELECT SUM(A.menube_costo+C.menuco_costo) AS total '+
+                        'FROM menu_bebida AS A , menu_comida AS C , alimentos_orden AS AO, bebidas_orden AS BO , orden '+
+                        'WHERE (AO.ali_menuco_id = BO.beb_menube_id) '+
+                        'AND (C.menuco_id = AO.ali_menuco_id) '+
+                        'AND (A.menube_id = BO.beb_menube_id)'+
+                        'AND orden.ord_id = 1 ';
         const orden = await connection.query(query, [ord_id]);
         res.json(orden);
     } catch(error){
