@@ -134,14 +134,16 @@ router.get('/leer_detalles_bebida/:ord_id', async(req, res) =>{
 router.get('/total_orden/:ord_id', async(req, res) =>{
     try{
         const ord_id = req.params.ord_id;
-        const query =   'SELECT SUM(A.menube_costo+C.menuco_costo) AS total '+
-                        'FROM menu_bebida AS A , menu_comida AS C , alimentos_orden AS AO, bebidas_orden AS BO , orden '+
-                        'WHERE (AO.ali_menuco_id = BO.beb_menube_id) '+
-                        'AND (C.menuco_id = AO.ali_menuco_id) '+
-                        'AND (A.menube_id = BO.beb_menube_id)'+
-                        'AND orden.ord_id = 1 ';
-        const orden = await connection.query(query, [ord_id]);
-        res.json(orden);
+        const x = 'SELECT SUM(A.menube_costo) AS total ' +
+            'FROM menu_bebida AS A , bebidas_orden AS BO , orden ' +
+            'WHERE (A.menube_id = BO.beb_menube_id) AND (BO.beb_ord_id=orden.ord_id) AND orden.ord_id = ? ';
+        const y = 'SELECT SUM(C.menuco_costo) AS total ' +
+            'FROM menu_comida AS C , alimentos_orden AS AO , orden ' +
+            'WHERE  (C.menuco_id = AO.ali_menuco_id) AND (AO.ali_ord_id=orden.ord_id) AND orden.ord_id = ? ';
+        const comida = await connection.query(y, [ord_id]);
+        const bebida = await connection.query(x, [ord_id]);
+        const orden = comida[0].total + bebida[0].total;
+        res.json([{"total": orden}]);
     } catch(error){
         return res.json({
             error: error
