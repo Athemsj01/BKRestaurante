@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/menu_comida',require('./routes/menuco'));
 app.use('/menu_bebidas',require('./routes/menu_bebida'));
-app.use('/meseros',require('./routes/meseros'));
+app.use('/mesero',require('./routes/mesero'));
 app.use('/ordenes',require('./routes/orden'));
 app.use('/alimentos_orden',require('./routes/alimentos orden'));
 app.use('/bebidas',require('./routes/bebidas_orden'));
