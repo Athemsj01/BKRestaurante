@@ -7,7 +7,7 @@ router.get('/mostrar_orden', async (req, res) => { //Mostrar todas las ordenes
     try{
         const query = 'SELECT'+
                         ' o.ord_id,o.ord_mesa_id,mese.mese_nombre AS ord_mese_nombre,'+
-                        'o.ord_fecha,o.ord_pago '+
+                        'o.ord_fecha, o.ord_factura '+
                         ' FROM orden AS o'+
                         ' INNER JOIN mesero AS mese'+
                         ' ON ord_mese_id = mese.mese_id';
@@ -40,9 +40,9 @@ router.post('/nueva_orden', async (req, res) => { //Agregar nueva orden
     try{
         const body = req.body;
         const query = 'INSERT INTO orden '+
-                        '(ord_id, ord_mesa_id, ord_mese_id, ord_fecha, ord_pago ) '+
-                        'VALUES (?, ?, ?, ?, ?)';
-        const result = await connection.query(query, [body.ord_id, body.ord_mesa_id, body.ord_mese_id, body.ord_fecha, body.ord_pago]);
+                        '(ord_id, ord_mesa_id, ord_mese_id, ord_fecha, ord_pago ,ord_factura) '+
+                        "VALUES (?, ?, ?, ?, 0.0, 'n')";
+        const result = await connection.query(query, [body.ord_id, body.ord_mesa_id, body.ord_mese_id, body.ord_fecha, body.ord_pago, body.ord_factura]);
 
         res.json('ok');
 
